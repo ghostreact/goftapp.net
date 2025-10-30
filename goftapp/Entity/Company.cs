@@ -1,4 +1,6 @@
 
+using System.Text.Json.Serialization;
+
 namespace goftapp.Entity;
 
 
@@ -14,6 +16,7 @@ public class Company
 
     // ผู้แทนบริษัท (1 บริษัทมี 1 user เป็นตัวแทน)
     public Guid? CompanyRepUserId { get; set; }
+    [JsonIgnore]
     public Users? CompanyRepUser { get; set; }
 
     public ICollection<InternshipApplication> Applications { get; set; } = new List<InternshipApplication>();

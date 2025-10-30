@@ -1,6 +1,3 @@
+// DTOs/TeacherDtos.cs
 namespace goftapp.DTOs;
-
-public class TeacherDtos
-{
-    
-}
+public record CreateTeacherUserDto(string Username, string Password, string FullName, string? Department);
