@@ -8,17 +8,15 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-// Add services to the container.
+// Blazor (Razor Components)
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Controllers + JSON options
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -33,32 +31,34 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IDailyLogService, DailyLogService>();
 
-
+// OpenAPI
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// seed admin
+// Seed admin (หลัง Build ก่อน Map endpoints)
 await DbSeeder.SeedAdminAsync(app.Services);
 
-app.MapOpenApi();
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// ---- Pipeline ----
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
-app.MapControllers();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.MapControllers();
+
 app.UseAntiforgery();
-app.MapBlazorHub();
-app.MapStaticAssets();
-app.MapFallbackToPage("/_Host");
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
